@@ -1,12 +1,18 @@
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
+// import {createNativeStackNavigator, disable} from '@react-navigation/native-stack';
+import {createStackNavigator} from '@react-navigation/stack';
 import type {Node} from 'react';
 import React, {useRef, useState} from 'react';
 import {Button, Text, View} from 'react-native';
 import Video from 'react-native-video';
 
+import {enableScreens} from 'react-native-screens';
+
+enableScreens(false);
+
 import {NavigationContainer, useNavigation} from '@react-navigation/native';
 
-const Stack = createNativeStackNavigator();
+const Stack = createStackNavigator();
+// const Stack = createNativeStackNavigator();
 
 const Home = () => {
   const nav = useNavigation();
