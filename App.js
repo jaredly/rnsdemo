@@ -1,5 +1,8 @@
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import type {Node} from 'react';
+import {
+  createNativeStackNavigator,
+  RetainContext,
+} from '@react-navigation/native-stack';
+import {Node, useContext, useEffect} from 'react';
 import React, {useRef, useState} from 'react';
 import {Button, Text, View} from 'react-native';
 import Video from 'react-native-video';
@@ -35,7 +38,19 @@ const OtherScreen = () => {
 const VideoScreen = () => {
   const ref = useRef(null);
   const nav = useNavigation();
+  if (!RetainContext) {
+    throw new Error('not there?');
+  }
+  const {retain, release, restore} = useContext(RetainContext);
   const [pip, setPip] = useState(false);
+  const key = React.useRef(null);
+  useEffect(() => {
+    if (pip) {
+      key.current = retain();
+    } else if (key.current) {
+      release(key.current);
+    }
+  }, [pip]);
   return (
     <View style={{alignItems: 'center', padding: 48}}>
       <Video
@@ -44,12 +59,25 @@ const VideoScreen = () => {
         source={require('./sample-5s.mp4')}
         style={{width: 300, height: 200}}
         pictureInPicture={pip}
+        // controls
         onPictureInPictureStatusChanged={({isActive}) => setPip(isActive)}
         onRestoreUserInterfaceForPictureInPictureStop={() => {
-          ref.current.restoreUserInterfaceForPictureInPictureStopCompleted();
+          if (key.current) {
+            restore(key.current);
+          }
+          setTimeout(() => {
+            ref.current.restoreUserInterfaceForPictureInPictureStopCompleted(
+              true,
+            );
+          }, 100);
         }}
       />
-      <Button onPress={() => setPip(!pip)} title="Picture in Picture it up" />
+      <Button
+        onPress={() => {
+          setPip(!pip);
+        }}
+        title="Picture in Picture it up"
+      />
       <Button onPress={() => nav.push('Other')} title="Go to another screen" />
       <Button
         onPress={() => nav.push('Video')}
